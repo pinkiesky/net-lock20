@@ -1,11 +1,24 @@
 extends layout.pug
 
 block content
-  h1: pre Pc Is Locked: #{locked}
+  div(style='text-align: center; padding: 1rem;')
+    div Status:
+    div(style='font-size: 500%')= locked ? '🔒' : '🔓'
 
-  form(method='POST')
-      input(name='action' type='hidden' value='locknow')
-      input(type='submit' value='Lock')
-  form(method='POST')
-      input(name='action' type='hidden' value='unlocknow')
-      input(type='submit' value='Unlock')
+  div(style='display: flex;')
+    form(method='POST')
+        input(name='action' type='hidden' value='locknow')
+        input(type='submit' value='🔒 Lock')
+    form(method='POST')
+        input(name='action' type='hidden' value='unlocknow')
+        input(type='submit' value='🔓 Unlock')
+
+  style.
+    form {
+      width: 100%;
+    }
+
+    input[type=submit] {
+      min-height: 3rem;
+      width: 100%;
+    }
