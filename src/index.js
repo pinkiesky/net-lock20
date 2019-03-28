@@ -2,7 +2,7 @@ const debug = require('debug')('nl20');
 
 const Koa = require('koa');
 const koaBody = require('koa-body');
-const pug = require('pug');
+const pugRendered = require('./middleware/pug');
 
 const xautolock = require('./xautolock');
 const Locker = require('./lock');
@@ -31,6 +31,8 @@ app.use(async (ctx, next) => {
     }
 });
 
+app.use(pugRendered());
+
 app.use(async (ctx, next) => {
     const { method, url } = ctx;
     if (method !== 'GET') {
@@ -38,13 +40,19 @@ app.use(async (ctx, next) => {
     }
 
     if (['/', '/index'].includes(url)) {
-        ctx.body = pug.renderFile('./views/index.pug', {
-            locked: await locker.isLocked(),
-        });
+        ctx.render = {
+            name: 'index.pug',
+            options: {
+                locked: await locker.isLocked(),
+            },
+        };
     } else if (['/error'].includes(url)) {
-        ctx.body = pug.renderFile('./views/error.pug', {
-            error: 'unknown error',
-        });
+        ctx.render = {
+            name: 'error.pug',
+            options: {
+                error: 'unknown error',
+            },
+        };
     }
 
     return null;
@@ -63,10 +71,15 @@ app.use(async (ctx) => {
     }
     try {
         await action();
-        ctx.body = pug.renderFile('./views/action.pug');
+        ctx.render = 'action.pug';
     } catch (error) {
         console.error(error);
-        ctx.body = pug.renderFile('./views/error.pug', { error });
+
+        ctx.status = 500;
+        ctx.render = {
+            name: 'error.pug',
+            options: { error },
+        };
     }
 });
 
