@@ -3,6 +3,7 @@ const debug = require('debug')('nl20');
 const Koa = require('koa');
 const koaBody = require('koa-body');
 const pugRendered = require('./middleware/pug');
+const reqFilter = require('./middleware/reqFilter');
 
 const xautolock = require('./xautolock');
 const Locker = require('./lock');
@@ -33,12 +34,8 @@ app.use(async (ctx, next) => {
 
 app.use(pugRendered());
 
-app.use(async (ctx, next) => {
-    const { method, url } = ctx;
-    if (method !== 'GET') {
-        return next();
-    }
-
+app.use(reqFilter(async (ctx, next) => {
+    const { url } = ctx;
     if (['/', '/index'].includes(url)) {
         ctx.render = {
             name: 'index.pug',
@@ -56,7 +53,11 @@ app.use(async (ctx, next) => {
     }
 
     return null;
-});
+}, {
+    availableMethods: ['GET'],
+    pathCheck: /^\/\w*$/i,
+    name: 'pageHandlerFilter',
+}));
 
 app.use(koaBody());
 
