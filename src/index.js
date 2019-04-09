@@ -4,6 +4,7 @@ const Koa = require('koa');
 const koaBody = require('koa-body');
 const pugRendered = require('./middleware/pug');
 const reqFilter = require('./middleware/reqFilter');
+const rollup = require('./middleware/rollup');
 
 const xautolock = require('./xautolock');
 const Locker = require('./lock');
@@ -33,8 +34,23 @@ app.use(async (ctx, next) => {
 });
 
 app.use(pugRendered());
+app.use(rollup());
 
-app.use(reqFilter(async (ctx, next) => {
+const jsFileRE = (/^\/(\w+\.js)$/i);
+app.use(reqFilter(async (ctx) => {
+    const { url } = ctx;
+
+    const [, filename] = jsFileRE.exec(url);
+    ctx.state.$rollup = filename;
+
+    return null;
+}, {
+    availableMethods: ['GET'],
+    pathCheck: jsFileRE,
+    name: 'pageHandlerFilter',
+}));
+
+app.use(reqFilter(async (ctx) => {
     const { url } = ctx;
     if (['/', '/index'].includes(url)) {
         ctx.render = {
