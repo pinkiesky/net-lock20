@@ -21,6 +21,10 @@ module.exports = function pugRendered(options) {
             format: 'iife',
         });
 
+        if (output.length !== 1) {
+            throw new Error(`Wrong rollup bundles length: ${output.length}`);
+        }
+
         ctx.type = 'application/javascript';
         ctx.body = output[0].code;
     };
