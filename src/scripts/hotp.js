@@ -10,17 +10,27 @@ export async function hash(msgBuffer, hashName = 'SHA-256') {
     return window.crypto.subtle.digest(hashName, msgBuffer);
 }
 
+export function getHotpTimeInfo(hotpData) {
+    const now = Date.now() / 1000;
+    const currentWindow = parseInt(now / hotpData.timeWindowSec, 10);
+    const remainingSec = hotpData.timeWindowSec - (now - currentWindow * hotpData.timeWindowSec);
+
+    return {
+        now, currentWindow, remainingSec,
+    };
+}
+
 /**
  * @param {object} hotpData
  * @param {string} hotpData.secret
  * @param {number} hotpData.timeWindowSec
  * @param {number} hotpData.tokenSize
  * @param {string} hotpData.digestName
- * @returns {string}
+ * @returns {object}
  */
-export default async function createHotp(hotpData) {
-    const now = Date.now() / 1000;
-    const currentWindow = parseInt(now / hotpData.timeWindowSec, 10);
+export async function createHotp(hotpData) {
+    const timeInfo = getHotpTimeInfo(hotpData);
+    const { currentWindow } = timeInfo;
 
     const str = TEXT_ENC.encode(hotpData.secret);
     const fullData = new Uint8Array(str.length + C_LONG_SIZE);
@@ -40,7 +50,6 @@ export default async function createHotp(hotpData) {
     ).join('');
 
     return {
-        hotp,
-        remainingSec: hotpData.timeWindowSec - (now - currentWindow * hotpData.timeWindowSec),
+        hotp, timeInfo,
     };
 }
