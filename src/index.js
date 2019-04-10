@@ -66,6 +66,8 @@ app.use(reqFilter(async (ctx) => {
                 error: 'unknown error',
             },
         };
+    } else if (['/hotp'].includes(url)) {
+        ctx.render = 'hotp.pug';
     }
 
     return null;
