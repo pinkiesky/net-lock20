@@ -2,10 +2,7 @@ const rollup = require('rollup');
 const { join } = require('path');
 
 
-module.exports = function pugRendered(options) {
-    const opts = Object.assign({
-    }, options);
-
+module.exports = function pugRendered() {
     return async (ctx, next) => {
         await next();
 

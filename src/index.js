@@ -1,5 +1,3 @@
-const debug = require('debug')('nl20');
-
 const Koa = require('koa');
 const koaBody = require('koa-body');
 const pugRendered = require('./middleware/pug');

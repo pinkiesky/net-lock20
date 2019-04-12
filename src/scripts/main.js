@@ -22,6 +22,7 @@ function scheduleHotpUpdate(hotpData, timeInfo) {
     const delay = Math.min(1000, timeInfo.remainingSec * 1000);
     console.debug(`schedule hotp update with delay ${delay}ms`);
 
+    // eslint-disable-next-line no-use-before-define
     setTimeout(() => updateHotp(hotpData, timeInfo.currentWindow), delay);
 }
 
